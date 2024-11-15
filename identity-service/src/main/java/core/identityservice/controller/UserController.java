@@ -1,5 +1,6 @@
 package core.identityservice.controller;
 
+import core.identityservice.dto.request.ApiResponse;
 import core.identityservice.dto.request.UserCreationRequest;
 import core.identityservice.dto.request.UserUpdateRequest;
 import core.identityservice.entity.User;
@@ -17,8 +18,10 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/create")
-    User createUser(@RequestBody @Valid UserCreationRequest request) {
-        return userService.createRequest(request);
+    ApiResponse<User> createUser(@RequestBody @Valid UserCreationRequest request) {
+        ApiResponse<User> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.createRequest(request));
+        return apiResponse;
     }
 
     @GetMapping("/all")

@@ -3,6 +3,8 @@ package core.identityservice.service;
 import core.identityservice.dto.request.UserCreationRequest;
 import core.identityservice.dto.request.UserUpdateRequest;
 import core.identityservice.entity.User;
+import core.identityservice.exception.AppException;
+import core.identityservice.exception.ErrorCode;
 import core.identityservice.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -18,7 +20,7 @@ public class UserService {
         User user = new User();
 
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists");
+            throw new AppException(ErrorCode.USER_EXIST);
         }
 
         user.setUsername(request.getUsername());
