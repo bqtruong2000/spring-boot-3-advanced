@@ -1,4 +1,4 @@
-package core.identityservice.dto.request;
+package core.identityservice.dto.response;
 
 import lombok.*;
 import lombok.experimental.FieldDefaults;
@@ -10,9 +10,11 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserUpdateRequest {
-    private String password;
-    private String firstName;
-    private String lastName;
-    private LocalDate dob;
+public class UserResponse {
+    String id;
+    String username;
+    String password;
+    String firstName;
+    String lastName;
+    LocalDate dob;
 }
