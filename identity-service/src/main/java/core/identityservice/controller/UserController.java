@@ -9,7 +9,8 @@ import core.identityservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,19 +19,29 @@ import java.util.List;
 @RequestMapping("users")
 @RequiredArgsConstructor
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
+@Slf4j
 public class UserController {
     UserService userService;
 
     @PostMapping("/create")
-    ApiResponse<User> createUser(@RequestBody @Valid UserCreationRequest request) {
-        ApiResponse<User> apiResponse = new ApiResponse<>();
+    ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest request) {
+        ApiResponse<UserResponse> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.createRequest(request));
         return apiResponse;
     }
 
     @GetMapping("/all")
-    List<User> getAllUsers() {
-        return userService.getAllUsers();
+    ApiResponse<List<UserResponse>> getAllUsers() {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        log.info("Username {}", authentication.getName());
+        authentication.getAuthorities()
+                .forEach(a ->
+                log.info("Authority {}", a.getAuthority()));
+
+        ApiResponse<List<UserResponse>> apiResponse = new ApiResponse<>();
+        apiResponse.setResult(userService.getAllUsers());
+        return apiResponse;
     }
 
     @GetMapping("/{id}")

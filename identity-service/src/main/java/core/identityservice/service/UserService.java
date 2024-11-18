@@ -4,6 +4,7 @@ import core.identityservice.dto.request.UserCreationRequest;
 import core.identityservice.dto.request.UserUpdateRequest;
 import core.identityservice.dto.response.UserResponse;
 import core.identityservice.entity.User;
+import core.identityservice.enums.Role;
 import core.identityservice.exception.AppException;
 import core.identityservice.exception.ErrorCode;
 import core.identityservice.mapper.UserMapper;
@@ -14,6 +15,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -22,8 +24,9 @@ import java.util.List;
 public class UserService {
     UserRepository userRepository;
     UserMapper userMapper;
+    PasswordEncoder passwordEncoder;
 
-    public User createRequest(UserCreationRequest request) {
+    public UserResponse createRequest(UserCreationRequest request) {
 
 
         if (userRepository.existsByUsername(request.getUsername())) {
@@ -32,14 +35,17 @@ public class UserService {
 
         User user = userMapper.toUser(request);
 
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        return userRepository.save(user);
+        HashSet<String> roles = new HashSet<>();
+        roles.add(Role.USER.name());
+        user.setRoles(roles);
+
+        return userMapper.toUserResponse(userRepository.save(user));
     }
 
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
+    public List<UserResponse> getAllUsers() {
+        return userMapper.toUserResponseList(userRepository.findAll());
     }
 
     public UserResponse getUserById(String id) {
