@@ -56,8 +56,10 @@ public class UserController {
     }
 
     @PutMapping("/update/{id}")
-    UserResponse updateUser(@PathVariable String id, @RequestBody UserUpdateRequest request) {
-        return userService.updateUser(id, request);
+    ApiResponse<UserResponse> updateUser(@PathVariable String id, @RequestBody UserUpdateRequest request) {
+        return ApiResponse.<UserResponse>builder()
+                .result(userService.updateUser(id, request))
+                .build();
     }
 
     @DeleteMapping("/delete/{id}")
