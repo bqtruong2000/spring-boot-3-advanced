@@ -4,7 +4,6 @@ import core.identityservice.dto.request.ApiResponse;
 import core.identityservice.dto.request.UserCreationRequest;
 import core.identityservice.dto.request.UserUpdateRequest;
 import core.identityservice.dto.response.UserResponse;
-import core.identityservice.entity.User;
 import core.identityservice.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,7 +36,7 @@ public class UserController {
         log.info("Username {}", authentication.getName());
         authentication.getAuthorities()
                 .forEach(a ->
-                log.info("Authority {}", a.getAuthority()));
+                        log.info("Authority {}", a.getAuthority()));
 
         ApiResponse<List<UserResponse>> apiResponse = new ApiResponse<>();
         apiResponse.setResult(userService.getAllUsers());
