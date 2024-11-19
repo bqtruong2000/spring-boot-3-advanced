@@ -13,17 +13,12 @@ import java.util.Set;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "users")
-public class User {
+@Table(name = "roles")
+public class Role {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    String id;
-    String username;
-    String password;
-    String firstName;
-    String lastName;
-    LocalDate dob;
+    String name;
+    String description;
 
     @ManyToMany
-    Set<Role> roles;
+    Set<Permission> permissions;
 }
