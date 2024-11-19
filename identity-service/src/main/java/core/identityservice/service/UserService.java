@@ -50,8 +50,8 @@ public class UserService {
         return userMapper.toUserResponse(userRepository.save(user));
     }
 
-    //@PreAuthorize("hasRole('ADMIN')")
-    @PreAuthorize("hasAuthority('APPROVE_POST')")
+    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasAuthority('APPROVE_POST')")
     public List<UserResponse> getAllUsers() {
         log.info("In method get users");
         return userMapper.toUserResponseList(userRepository.findAll());
