@@ -77,6 +77,8 @@ public class GlobalExceptionHandler {
                         .build());
     }
 
+    // .AuthenticationServiceException
+
     private String mapAttribute(String message, Map<String, Object> attributes){
         String minValue = String.valueOf(attributes.get(MIN_ATTRIBUTE));
 
