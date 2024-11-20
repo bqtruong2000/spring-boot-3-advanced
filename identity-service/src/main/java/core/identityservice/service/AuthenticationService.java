@@ -7,11 +7,14 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import core.identityservice.dto.request.AuthenticationRequest;
 import core.identityservice.dto.request.IntrospectRequest;
+import core.identityservice.dto.request.LogoutRequest;
 import core.identityservice.dto.response.AuthenticationResponse;
 import core.identityservice.dto.response.IntrospectResponse;
+import core.identityservice.entity.InvalidatedToken;
 import core.identityservice.entity.User;
 import core.identityservice.exception.AppException;
 import core.identityservice.exception.ErrorCode;
+import core.identityservice.repository.InvalidatedRepository;
 import core.identityservice.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -28,6 +31,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.StringJoiner;
+import java.util.UUID;
 
 @Slf4j
 @Service
@@ -35,6 +39,7 @@ import java.util.StringJoiner;
 @FieldDefaults(level = lombok.AccessLevel.PRIVATE, makeFinal = true)
 public class AuthenticationService {
     UserRepository userRepository;
+    InvalidatedRepository invalidatedRepository;
 
     @NonFinal
     @Value("${jwt.secret}")
@@ -42,16 +47,15 @@ public class AuthenticationService {
 
     public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
         var token = request.getToken();
+        boolean isValid = true;
 
-        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+        try {
+            verifyToken(token);
+        } catch (AppException e) {
+            isValid = false;
+        }
 
-        SignedJWT signedJWT = SignedJWT.parse(token);
-
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        var verified = signedJWT.verify(verifier);
-
-        return IntrospectResponse.builder().isValid(verified && expiryTime.after(new Date())).build();
+        return IntrospectResponse.builder().isValid(isValid).build();
     }
 
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -66,10 +70,48 @@ public class AuthenticationService {
 
         var token = generateToken(user);
 
+
         return AuthenticationResponse.builder()
                 .isAuthenticated(true)
                 .token(token)
                 .build();
+    }
+
+    public void logout(LogoutRequest request)
+            throws ParseException, JOSEException {
+        var signToken = verifyToken(request.getToken());
+
+        String jti = signToken.getJWTClaimsSet().getJWTID();
+        Date expiryTime = signToken.getJWTClaimsSet().getExpirationTime();
+
+        InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                .id(jti)
+                .expiryTime(expiryTime)
+                .build();
+
+        invalidatedRepository.save(invalidatedToken);
+    }
+
+    private SignedJWT verifyToken(String token)
+            throws JOSEException, ParseException {
+        JWSVerifier verifier = new MACVerifier(SIGNER_KEY.getBytes());
+
+        SignedJWT signedJWT = SignedJWT.parse(token);
+
+        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+
+        var verified = signedJWT.verify(verifier);
+
+        if (!(verified && expiryTime.after(new Date())))
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+
+        invalidatedRepository.findById(signedJWT.getJWTClaimsSet().getJWTID())
+                .ifPresent(invalidatedToken -> {
+                    throw new AppException(ErrorCode.UNAUTHENTICATED);
+                });
+
+
+        return signedJWT;
     }
 
     private String generateToken(User user) {
@@ -79,7 +121,9 @@ public class AuthenticationService {
                 .subject(user.getUsername())
                 .issuer("identity-service")
                 .issueTime(new Date())
-                .expirationTime(new Date(Instant.now().plus(1, ChronoUnit.HOURS).toEpochMilli()))
+                .expirationTime(new Date(Instant.now()
+                        .plus(1, ChronoUnit.HOURS).toEpochMilli()))
+                .jwtID(UUID.randomUUID().toString())
                 .claim("scope", buildScope(user))
                 .build();
 
