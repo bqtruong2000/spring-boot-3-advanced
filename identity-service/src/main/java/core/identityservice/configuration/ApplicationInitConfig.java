@@ -22,9 +22,9 @@ public class ApplicationInitConfig {
     PasswordEncoder passwordEncoder;
 
     @Bean
-    @ConditionalOnProperty(prefix = "spring",
-            value = "datasource.driverClassName",
-            havingValue = "org.postgresql.Driver")
+//    @ConditionalOnProperty(prefix = "spring",
+//            value = "datasource.driverClassName",
+//            havingValue = "org.postgresql.Driver")
     ApplicationRunner applicationRunner(UserRepository userRepository) {
         log.info("Init application");
         return args -> {

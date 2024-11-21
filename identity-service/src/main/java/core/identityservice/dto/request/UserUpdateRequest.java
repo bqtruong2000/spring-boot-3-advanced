@@ -1,6 +1,6 @@
 package core.identityservice.dto.request;
 
-import core.identityservice.validator.DobConstraint;
+import core.identityservice.validator.dob.DobConstraint;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

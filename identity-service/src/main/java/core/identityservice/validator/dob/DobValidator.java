@@ -1,4 +1,4 @@
-package core.identityservice.validator;
+package core.identityservice.validator.dob;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;

@@ -1,13 +1,28 @@
 package core.identityservice.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.jayway.jsonpath.JsonPath;
+import com.nimbusds.jose.JWSAlgorithm;
+import com.nimbusds.jose.JWSHeader;
+import com.nimbusds.jose.JWSObject;
+import com.nimbusds.jose.Payload;
+import com.nimbusds.jwt.JWTClaimsSet;
+import core.identityservice.dto.request.AuthenticationRequest;
 import core.identityservice.dto.request.UserCreationRequest;
+import core.identityservice.dto.response.PermissionResponse;
+import core.identityservice.dto.response.RoleResponse;
 import core.identityservice.dto.response.UserResponse;
+import core.identityservice.entity.User;
+import core.identityservice.enums.Role;
+import core.identityservice.exception.ErrorCode;
+import lombok.experimental.NonFinal;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
@@ -20,7 +35,11 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @SpringBootTest
 @Slf4j
@@ -45,11 +64,16 @@ public class UserControllerIntegrationTest {
 
     private UserCreationRequest request;
     private UserResponse userResponse;
-    private LocalDate dob;
+
+    @NonFinal
+    @Value("${jwt.valid-duration}")
+    protected long VALID_DURATION;
+
+
 
     @BeforeEach
     void initData() {
-        dob = LocalDate.of(1990, 1, 1);
+        LocalDate dob = LocalDate.of(1990, 1, 1);
 
         request = UserCreationRequest.builder()
                 .username("johndoe")
@@ -67,6 +91,39 @@ public class UserControllerIntegrationTest {
                 .dob(dob)
                 .roles(null)
                 .build();
+
+    }
+
+    
+
+
+    private String getAdminToken() throws Exception {
+
+        var roles = new HashSet<String>();
+        roles.add(Role.ADMIN.name());
+        User user = User.builder()
+                .username("admin")
+                .password("admin")
+                .build();
+
+        AuthenticationRequest authenticationRequest = AuthenticationRequest.builder()
+                .username(user.getUsername())
+                .password(user.getPassword())
+                .build();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String content = objectMapper.writeValueAsString(authenticationRequest);
+
+        var jsonResponse = mockMvc.perform(MockMvcRequestBuilders
+                        .post("/auth/token")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(content))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        return JsonPath.read(jsonResponse, "$.result.token");
     }
 
     @Test
@@ -101,4 +158,122 @@ public class UserControllerIntegrationTest {
                 );
         log.info("Result: {}", response.andReturn().getResponse().getContentAsString());
     }
+
+    @Test
+    public void createUser_invalidRequest_fail_with_username() throws Exception {
+        // Given
+        request.setUsername("john");
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String content = objectMapper.writeValueAsString(request);
+
+        // When, Then
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/users/create")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(content))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("code").value(1003))
+                .andExpect(MockMvcResultMatchers.jsonPath("message").value("Username must be at least 5 characters")
+                );
+    }
+
+    @Test
+    public void createUser_invalidRequest_fail_with_password() throws Exception {
+        // Given
+        request.setPassword("123456");
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String content = objectMapper.writeValueAsString(request);
+
+        // When, Then
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/users/create")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(content))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("code").value(1004))
+                .andExpect(MockMvcResultMatchers.jsonPath("message").value("Password must be at least 8 characters")
+                );
+    }
+
+    @Test
+    public void createUser_invalidRequest_fail_with_dob() throws Exception {
+        // Given
+        request.setDob(LocalDate.of(2010, 1, 1));
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String content = objectMapper.writeValueAsString(request);
+
+        // When, Then
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/users/create")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(content))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("code").value(1008))
+                .andExpect(MockMvcResultMatchers.jsonPath("message").value("Your age must be at least 16")
+                );
+    }
+
+    @Test
+    public void createUser_invalidRequest_fail_with_firstName() throws Exception {
+        // Given
+        request.setFirstName("J");
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String content = objectMapper.writeValueAsString(request);
+
+        // When, Then
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/users/create")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(content))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("code").value(ErrorCode.valueOf("INVALID_FIRST_NAME").getCode()))
+                .andExpect(MockMvcResultMatchers.jsonPath("message").value("First name must be at least 2 characters")
+                );
+    }
+
+    @Test
+    public void createUser_invalidRequest_fail_with_lastName() throws Exception {
+        // Given
+        request.setLastName("D");
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.registerModule(new JavaTimeModule());
+        String content = objectMapper.writeValueAsString(request);
+
+        // When, Then
+        mockMvc.perform(MockMvcRequestBuilders
+                        .post("/users/create")
+                        .contentType(MediaType.APPLICATION_JSON_VALUE)
+                        .content(content))
+                .andExpect(MockMvcResultMatchers.status().isBadRequest())
+                .andExpect(MockMvcResultMatchers.jsonPath("code").value(ErrorCode.valueOf("INVALID_LAST_NAME").getCode()))
+                .andExpect(MockMvcResultMatchers.jsonPath("message").value("Last name must be at least 2 characters")
+                );
+    }
+
+//    @Test
+//    public void getAllUser_validRequest_success() throws Exception {
+//        // Given
+//        String token = getAdminToken();
+//
+//        log.info("Token: {}", token);
+//
+//
+//
+//        // When, Then
+//        var response = mockMvc.perform(MockMvcRequestBuilders
+//                        .get("/users/all")
+//                        .header("Authorization", "Bearer " + token))
+//                .andExpect(MockMvcResultMatchers.status().isOk())
+//                .andExpect(MockMvcResultMatchers.jsonPath("code").value(1000));
+//
+//        log.info("Result: {}", response.andReturn().getResponse().getContentAsString());
+//
+//    }
+
+
 }
+
