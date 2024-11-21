@@ -6,6 +6,7 @@ server:
 spring:
   datasource:
     url: "jdbc:postgresql://localhost:5432/identity_service"
+    driver-class-name: org.postgresql.Driver
     username: postgres
     password: 123456
   jpa:
