@@ -17,6 +17,9 @@ import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 import javax.crypto.spec.SecretKeySpec;
 
@@ -45,8 +48,57 @@ public class SecurityConfig {
                                 jwtConfigurer.decoder(customJwtDecoder))
                         .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
 
+        httpSecurity.cors(cors -> {
+            CorsConfiguration corsConfiguration = new CorsConfiguration();
+            corsConfiguration.addAllowedOrigin("http://localhost:3000");
+            corsConfiguration.addAllowedMethod("*");
+            corsConfiguration.addAllowedHeader("*");
+            corsConfiguration.setAllowCredentials(true);
+
+            UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
+            urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
+
+            cors.configurationSource(urlBasedCorsConfigurationSource);
+        });
         return httpSecurity.build();
     }
+
+//    @Bean
+//    public CorsFilter corsFilter() {
+//        CorsConfiguration corsConfiguration = new CorsConfiguration();
+//        corsConfiguration.addAllowedOrigin("*"); // Allow this specific origin
+//        corsConfiguration.addAllowedMethod("*"); // Allow all HTTP methods (GET, POST, OPTIONS, etc.)
+//        corsConfiguration.addAllowedHeader("*"); // Allow all headers
+//        corsConfiguration.setAllowCredentials(true); // Allow credentials like cookies or Authorization headers
+//
+//        // Include these headers to handle preflight requests
+//        corsConfiguration.addExposedHeader("Access-Control-Allow-Origin");
+//        corsConfiguration.addExposedHeader("Access-Control-Allow-Credentials");
+//
+//        UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
+//        urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
+//
+//        return new CorsFilter(urlBasedCorsConfigurationSource);
+//    }
+//
+//    private static class CorsConfigurer extends AbstractHttpConfigurer<CorsConfigurer, HttpSecurity> {
+//        @Override
+//        public void configure(HttpSecurity http) throws Exception {
+//            http.cors(cors -> {
+//                CorsConfiguration corsConfiguration = new CorsConfiguration();
+//                corsConfiguration.addAllowedOrigin("http://localhost:3000");
+//                corsConfiguration.addAllowedMethod("*");
+//                corsConfiguration.addAllowedHeader("*");
+//                corsConfiguration.setAllowCredentials(true);
+//
+//                UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
+//                urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
+//
+//                cors.configurationSource(urlBasedCorsConfigurationSource);
+//            });
+//        }
+//    }
+
 
     @Bean
     JwtAuthenticationConverter jwtAuthenticationConverter() {
