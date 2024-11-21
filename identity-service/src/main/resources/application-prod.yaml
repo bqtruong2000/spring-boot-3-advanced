@@ -1,0 +1,4 @@
+jwt:
+  secret: "7UviCHmOPSWbnklD0mRbljXc9/XFDlMzfK2N6cBd6ZCoO69bTB2B+o2CzJVITSsa"
+  valid-duration: 7200 # in seconds
+  refreshable-duration: 72000 # in seconds
