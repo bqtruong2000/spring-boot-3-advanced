@@ -11,12 +11,11 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-public class UserProfileController {
+public class InternalUserProfileController {
     UserProfileService userProfileService;
 
-    @GetMapping("/users/{profileId}")
-    public UserProfileResponse get(@PathVariable String profileId) {
-        return userProfileService.getProfile(profileId);
+    @PostMapping("/internal/users/create")
+    public UserProfileResponse create(@RequestBody UserProfileCreationRequest request) {
+        return userProfileService.createProfile(request);
     }
-
 }
