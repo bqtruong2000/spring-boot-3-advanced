@@ -7,9 +7,11 @@ import core.identityservice.entity.User;
 import core.identityservice.enums.Role;
 import core.identityservice.exception.AppException;
 import core.identityservice.exception.ErrorCode;
+import core.identityservice.mapper.ProfileMapper;
 import core.identityservice.mapper.UserMapper;
 import core.identityservice.repository.RoleRepository;
 import core.identityservice.repository.UserRepository;
+import core.identityservice.repository.httpclient.ProfileClient;
 import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +34,10 @@ public class UserService {
     RoleRepository roleRepository;
     UserMapper userMapper;
     PasswordEncoder passwordEncoder;
+    ProfileClient profileClient;
+    ProfileMapper profileMapper;
 
-    public UserResponse createRequest(UserCreationRequest request) {
+    public UserResponse createUser(UserCreationRequest request) {
         User user = userMapper.toUser(request);
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -47,6 +51,10 @@ public class UserService {
         } catch (DataIntegrityViolationException e) {
             throw new AppException(ErrorCode.USER_EXIST);
         }
+
+        var profileRequest = profileMapper.toProfileCreationRequest(request);
+        profileRequest.setUserId(user.getId());
+        profileClient.createProfile(profileRequest);
 
         return userMapper.toUserResponse(user);
     }

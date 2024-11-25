@@ -65,7 +65,7 @@ public class UserControllerTest {
         objectMapper.registerModule(new JavaTimeModule());
         String content = objectMapper.writeValueAsString(request);
 
-        Mockito.when(userService.createRequest(ArgumentMatchers.any()))
+        Mockito.when(userService.createUser(ArgumentMatchers.any()))
                 .thenReturn(userResponse);
 
         // When, Then

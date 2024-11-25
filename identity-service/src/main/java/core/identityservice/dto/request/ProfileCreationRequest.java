@@ -1,5 +1,8 @@
-package core.profileservice.dto.request;
+package core.identityservice.dto.request;
 
+import core.identityservice.validator.dob.DobConstraint;
+import core.identityservice.validator.name.NameConstraint;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -10,7 +13,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class UserProfileCreationRequest {
+public class ProfileCreationRequest {
     String userId;
     String firstName;
     String lastName;

@@ -21,9 +21,6 @@ public class User {
     @Column(name = "username", unique = true, columnDefinition = "VARCHAR(255)")
     String username;
     String password;
-    String firstName;
-    String lastName;
-    LocalDate dob;
 
     @ManyToMany
     Set<Role> roles;

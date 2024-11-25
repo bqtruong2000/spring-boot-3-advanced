@@ -68,9 +68,6 @@ public class UserServiceIntegrationTest {
         user = User.builder()
                 .id("cf0600f538b3")
                 .username("john")
-                .firstName("John")
-                .lastName("Doe")
-                .dob(dob)
                 .build();
     }
 
@@ -81,7 +78,7 @@ public class UserServiceIntegrationTest {
 //        when(userRepository.save(any())).thenReturn(user);
 
         // When
-        var response = userService.createRequest(request);
+        var response = userService.createUser(request);
 
         // Then
         Assertions.assertThat(response.getId()).isEqualTo("cf0600f538b3");

@@ -62,9 +62,6 @@ public class UserServiceTest {
         user = User.builder()
                 .id("cf0600f538b3")
                 .username("john")
-                .firstName("John")
-                .lastName("Doe")
-                .dob(dob)
                 .build();
     }
 
@@ -75,7 +72,7 @@ public class UserServiceTest {
         when(userRepository.save(any())).thenReturn(user);
 
         // When
-        var response = userService.createRequest(request);
+        var response = userService.createUser(request);
 
         // Then
         Assertions.assertThat(response.getId()).isEqualTo("cf0600f538b3");
@@ -90,7 +87,7 @@ public class UserServiceTest {
 
         // When
         var exception = assertThrows(AppException.class,
-                () -> userService.createRequest(request));
+                () -> userService.createUser(request));
 
         Assertions.assertThat(exception.getMessage()).isEqualTo("User already exist");
     }
