@@ -21,6 +21,8 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.HashSet;
 import java.util.List;
@@ -38,7 +40,9 @@ public class UserService {
     ProfileMapper profileMapper;
 
     public UserResponse createUser(UserCreationRequest request) {
+
         User user = userMapper.toUser(request);
+        log.info("Request: {}",request);
 
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
@@ -54,6 +58,9 @@ public class UserService {
 
         var profileRequest = profileMapper.toProfileCreationRequest(request);
         profileRequest.setUserId(user.getId());
+
+
+
         profileClient.createProfile(profileRequest);
 
         return userMapper.toUserResponse(user);
