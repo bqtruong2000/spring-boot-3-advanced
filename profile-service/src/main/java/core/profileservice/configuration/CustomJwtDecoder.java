@@ -1,4 +1,4 @@
-package core.identityservice.configuration;
+package core.profileservice.configuration;
 
 import com.nimbusds.jwt.SignedJWT;
 import org.springframework.security.oauth2.jwt.Jwt;

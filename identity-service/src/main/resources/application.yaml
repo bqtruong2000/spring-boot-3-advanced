@@ -5,12 +5,12 @@ server:
 
 spring:
   datasource:
-#    url: ${DBMS_CONNECTION:jdbc:postgresql://my-postgres:5432/identity_service_db}
-#     local
+    #    url: ${DBMS_CONNECTION:jdbc:postgresql://my-postgres:5432/identity_service_db}
+    #     local
     url: ${DBMS_CONNECTION:jdbc:postgresql://localhost:5432/identity_service_db}
     driver-class-name: org.postgresql.Driver
     username: ${DBMS_USERNAME:postgres}
-#    password: ${DBMS_PASSWORD:bqtruong}
+    #    password: ${DBMS_PASSWORD:bqtruong}
     # local
     password: ${DBMS_PASSWORD:123456}
   jpa:

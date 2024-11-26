@@ -27,14 +27,14 @@ public class UserProfileService {
         return userProfileMapper.toUserProfileResponse(userProfile);
     }
 
-    public UserProfileResponse getProfile(String id){
+    public UserProfileResponse getProfile(String id) {
         UserProfile userProfile = userProfileRepository.findById(id).orElseThrow(
-                ()-> new RuntimeException("User not found"));
+                () -> new RuntimeException("User not found"));
 
         return userProfileMapper.toUserProfileResponse(userProfile);
     }
 
-    public List<UserProfileResponse> getAllProfiles(){
+    public List<UserProfileResponse> getAllProfiles() {
         List<UserProfile> userProfiles = userProfileRepository.findAll();
         return userProfiles.stream().map(userProfileMapper::toUserProfileResponse).toList();
     }

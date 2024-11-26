@@ -8,5 +8,6 @@ import org.mapstruct.Mapper;
 @Mapper(componentModel = "spring")
 public interface UserProfileMapper {
     UserProfile toUserProfile(UserProfileCreationRequest request);
+
     UserProfileResponse toUserProfileResponse(UserProfile entity);
 }

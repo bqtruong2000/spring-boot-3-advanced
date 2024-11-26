@@ -1,8 +1,5 @@
 package core.identityservice.dto.request;
 
-import core.identityservice.validator.dob.DobConstraint;
-import core.identityservice.validator.name.NameConstraint;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 

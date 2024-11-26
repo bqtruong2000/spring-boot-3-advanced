@@ -1,18 +1,10 @@
 package core.identityservice.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.jayway.jsonpath.JsonPath;
-import com.nimbusds.jose.JWSAlgorithm;
-import com.nimbusds.jose.JWSHeader;
-import com.nimbusds.jose.JWSObject;
-import com.nimbusds.jose.Payload;
-import com.nimbusds.jwt.JWTClaimsSet;
 import core.identityservice.dto.request.AuthenticationRequest;
 import core.identityservice.dto.request.UserCreationRequest;
-import core.identityservice.dto.response.PermissionResponse;
-import core.identityservice.dto.response.RoleResponse;
 import core.identityservice.dto.response.UserResponse;
 import core.identityservice.entity.User;
 import core.identityservice.enums.Role;
@@ -35,11 +27,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.temporal.ChronoUnit;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashSet;
 
 @SpringBootTest
 @Slf4j
@@ -70,7 +59,6 @@ public class UserControllerIntegrationTest {
     protected long VALID_DURATION;
 
 
-
     @BeforeEach
     void initData() {
         LocalDate dob = LocalDate.of(1990, 1, 1);
@@ -93,8 +81,6 @@ public class UserControllerIntegrationTest {
                 .build();
 
     }
-
-    
 
 
     private String getAdminToken() throws Exception {

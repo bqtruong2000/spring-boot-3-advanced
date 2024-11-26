@@ -1,7 +1,6 @@
 package core.identityservice.validator.name;
 
 import com.nimbusds.jose.Payload;
-import core.identityservice.validator.dob.DobValidator;
 import jakarta.validation.Constraint;
 
 import java.lang.annotation.ElementType;
@@ -14,7 +13,7 @@ import java.lang.annotation.Target;
 @Constraint(
         validatedBy = {NameValidator.class}
 )
-public @interface NameConstraint{
+public @interface NameConstraint {
     String message() default "Invalid name";
 
     int min();
