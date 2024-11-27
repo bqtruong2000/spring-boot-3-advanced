@@ -41,18 +41,18 @@ public class SecurityConfig {
                                 jwtConfigurer.decoder(customJwtDecoder))
                         .authenticationEntryPoint(new JwtAuthenticationEntryPoint()));
 
-        httpSecurity.cors(cors -> {
-            CorsConfiguration corsConfiguration = new CorsConfiguration();
-            corsConfiguration.addAllowedOrigin("http://localhost:3000");
-            corsConfiguration.addAllowedMethod("*");
-            corsConfiguration.addAllowedHeader("*");
-            corsConfiguration.setAllowCredentials(true);
-
-            UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
-            urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
-
-            cors.configurationSource(urlBasedCorsConfigurationSource);
-        });
+//        httpSecurity.cors(cors -> {
+//            CorsConfiguration corsConfiguration = new CorsConfiguration();
+//            corsConfiguration.addAllowedOrigin("http://localhost:3000");
+//            corsConfiguration.addAllowedMethod("*");
+//            corsConfiguration.addAllowedHeader("*");
+//            corsConfiguration.setAllowCredentials(true);
+//
+//            UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
+//            urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
+//
+//            cors.configurationSource(urlBasedCorsConfigurationSource);
+//        });
         return httpSecurity.build();
     }
 
