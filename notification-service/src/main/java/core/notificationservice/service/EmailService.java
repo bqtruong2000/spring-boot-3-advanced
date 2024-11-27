@@ -20,7 +20,7 @@ import java.util.List;
 public class EmailService {
     EmailClient emailClient;
 
-    String apiKey = "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";
+    String apiKey = "";
 
     public EmailResponse sendEmail(SendEmailRequest request){
         EmailRequest emailRequest = EmailRequest.builder()

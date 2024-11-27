@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -38,6 +39,7 @@ public class UserService {
     PasswordEncoder passwordEncoder;
     ProfileClient profileClient;
     ProfileMapper profileMapper;
+    KafkaTemplate<String, String> kafkaTemplate;
 
     public UserResponse createUser(UserCreationRequest request) {
 
@@ -62,6 +64,9 @@ public class UserService {
 
 
         profileClient.createProfile(profileRequest);
+
+        // Public message to Kafka
+        kafkaTemplate.send("onboard-successful","Welcome our new member: " + user.getUsername());
 
         return userMapper.toUserResponse(user);
     }
