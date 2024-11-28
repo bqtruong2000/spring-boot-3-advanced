@@ -1,5 +1,6 @@
 package core.identityservice.service;
 
+import core.event.dto.NotificationEvent;
 import core.identityservice.dto.request.UserCreationRequest;
 import core.identityservice.dto.request.UserUpdateRequest;
 import core.identityservice.dto.response.UserResponse;
@@ -39,7 +40,7 @@ public class UserService {
     PasswordEncoder passwordEncoder;
     ProfileClient profileClient;
     ProfileMapper profileMapper;
-    KafkaTemplate<String, String> kafkaTemplate;
+    KafkaTemplate<String, Object> kafkaTemplate;
 
     public UserResponse createUser(UserCreationRequest request) {
 
@@ -65,8 +66,15 @@ public class UserService {
 
         profileClient.createProfile(profileRequest);
 
+        NotificationEvent notificationEvent = NotificationEvent.builder()
+                .channel("EMAIL")
+                .recipient(request.getEmail())
+                .subject("Welcome to our community")
+                .body("Hello " + request.getUsername())
+                .build();
+
         // Public message to Kafka
-        kafkaTemplate.send("onboard-successful","Welcome our new member: " + user.getUsername());
+        kafkaTemplate.send("notification-delivery", notificationEvent);
 
         return userMapper.toUserResponse(user);
     }
