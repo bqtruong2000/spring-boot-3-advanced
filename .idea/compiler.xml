@@ -9,6 +9,7 @@
         <outputRelativeToContentRoot value="true" />
         <module name="api-gateway" />
         <module name="profile-service" />
+        <module name="post-service" />
         <module name="identity-service" />
         <module name="notification-service" />
       </profile>
@@ -19,6 +20,7 @@
       <module name="api-gateway" options="-parameters" />
       <module name="identity-service" options="-parameters" />
       <module name="notification-service" options="-parameters" />
+      <module name="post-service" options="-parameters" />
       <module name="profile-service" options="-parameters" />
     </option>
   </component>
